@@ -1,0 +1,8 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/HTML-Widget-Constraint-ComplexPassword.t
+t/distribution.t
+t/0-signature.t
+lib/HTML/Widget/Constraint/ComplexPassword.pm
