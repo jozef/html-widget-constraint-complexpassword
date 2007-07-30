@@ -17,13 +17,19 @@ HTML::Widget::Constraint::ComplexPassword - HTML::Widget form constraint that ch
 		->min($HTML::Widget::Constraint::ComplexPassword::MIN_LENGTH)
 		->message('Must be at least '.$HTML::Widget::Constraint::HP_Password::MIN_LENGTH.' characters long');
 	$widget->constraint(HP_Password => @columns)
-		->message('Must contain at least '.$HTML::Widget::Constraint::HP_Password::MIN_LENGTH.' and include one upper and one lower case character. Must contain at least one Special Character - "'
-			.$HTML::Widget::Constraint::ComplexPassword::SPECIAL_CHARACTERS.'"');
+		->message(qq{
+			Must contain at least $HTML::Widget::Constraint::HP_Password::MIN_LENGTH characters and include
+			one upper and one lower case character. Must contain at least one number or a
+			Special Character - "$HTML::Widget::Constraint::ComplexPassword::SPECIAL_CHARACTERS"
+		)};
 	
 	#or this will be enought but then the error text is too long
 	$widget->constraint(HP_Password => @columns)
-		->message('Must be at lease Must contain at least one upper and one lower case character. Must contain at least one Special Character - "'
-			.$HTML::Widget::Constraint::ComplexPassword::SPECIAL_CHARACTERS.'"');
+		->message(qq{
+			Must be at lease Must contain at least one upper and one lower case character.
+			Must contain at least one number or a Special Character -
+			"$HTML::Widget::Constraint::ComplexPassword::SPECIAL_CHARACTERS"
+		});
 
 =head1 DESCRIPTION
 
@@ -31,10 +37,11 @@ A constraint for L<HTML::Widget> to check if the password is complex enought. Pa
 at least MIN_LENGTH characters count, one lower case character is required, one upper case character
 is required and either number or one of SPECIAL_CHARACTERS is needed.
 
-=head1 EXPORTS 
+=head2 EXPORTS 
 
 	our $MIN_LENGTH = 8;
-	our $SPECIAL_CHARACTERS = '/[]=+-*(){}% ^&.;:|~?!#$';
+	our $NUMBER_CHARACTERS  = '0123456789';
+	our $SPECIAL_CHARACTERS = '~`!@#$%^&*()-_+={}[]\\|:;"\'<>,.?/';
 
 =head2 TIPS
 
@@ -43,11 +50,18 @@ If you want to force different password lenght then do:
 	use HTML::Widget::Constraint::ComplexPassword;
 	$HTML::Widget::Constraint::HP_Password::MIN_LENGTH = 10;
 
-If you need just numbers and no other special characters then remove characters from the
+If you want just numbers and no other special characters then remove characters from the
 SPECIAL_CHARACTERS list:
 
 	use HTML::Widget::Constraint::ComplexPassword;
 	$HTML::Widget::Constraint::ComplexPassword::SPECIAL_CHARACTERS = '';
+
+=head1 TODO
+
+It will be nice to have more variants of "complexity". Let's say we can create
+method ->level($level_type) that will switch between them. For me this default
+is enought. If you have different demant just drop me an email and i can include it
+here may be somebody else will reuse.
 
 =cut
 
@@ -64,7 +78,30 @@ our @EXPORT_OK    = qw(
 );
 
 our $MIN_LENGTH = 8;
-our $SPECIAL_CHARACTERS = '/[]=+-*(){}% ^&.;:|~?!#$\'"<>\\A';
+our $NUMBER_CHARACTERS  = '0123456789';
+our $SPECIAL_CHARACTERS = '~`!@#$%^&*()-_+={}[]\\|:;"\'<>,.?/';
+
+=head1 METHODS
+
+=over 4
+
+=cut
+
+__PACKAGE__->mk_accessors(qw{
+	min_length
+});
+
+=item min_length()
+
+Set minimum length of password just for current widget.
+
+=item validate($value)
+
+Perform validation $value validation.
+
+Return true or false if the password is or isn't ok.
+
+=cut
 
 sub validate {
     my $self  = shift;
@@ -73,7 +110,7 @@ sub validate {
     return 0 if not defined $value;
 
 	#must have some length
-    return 0 if length($value) < $MIN_LENGTH;
+    return 0 if length($value) < ($self->min_length || $MIN_LENGTH);
 	
 	#must have one upper case character
 	return 0 if not $value =~ m{[A-Z]};
@@ -82,19 +119,26 @@ sub validate {
 	return 0 if not $value =~ m{[a-z]};
 
 	#must have one special character or number
-	my $char;
-	while ($char = chop($value)) {
-		last if (index($SPECIAL_CHARACTERS, $char) != -1);
+	my $special_char;
+	my $dup_value = $value;
+	while ($special_char = chop($dup_value)) {
+		last if (index($SPECIAL_CHARACTERS, $special_char) != -1);
+	}
+	my $number_char;
+	$dup_value = $value;
+	while ($number_char = chop($dup_value)) {
+		last if (index($NUMBER_CHARACTERS, $number_char) != -1);
 	}
 	return 0 if (
-		($char ne '')              #special char
+		($special_char eq '')  #special char
 		and
-		($value !~ m{[0-9]})       #number
+		($number_char eq '')   #number char
 	);
 
     return 1;
 }
 
+1;
 
 __END__
 
