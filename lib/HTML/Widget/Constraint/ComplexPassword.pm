@@ -148,6 +148,10 @@ sub validate {
     return 1;
 }
 
+=back
+
+=cut
+
 1;
 
 __END__
