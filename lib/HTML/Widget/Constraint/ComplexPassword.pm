@@ -15,20 +15,20 @@ HTML::Widget::Constraint::ComplexPassword - HTML::Widget form constraint that ch
 	#constraints
 	$widget->constraint('Length'          => @columns)
 		->min($HTML::Widget::Constraint::ComplexPassword::MIN_LENGTH)
-		->message('Must be at least '.$HTML::Widget::Constraint::HP_Password::MIN_LENGTH.' characters long');
+		->message('Must be at least '.$HTML::Widget::Constraint::ComplexPassword::MIN_LENGTH.' characters long');
 	$widget->constraint('ComplexPassword' => @columns)
 		->message(qq{
-			Must contain at least $HTML::Widget::Constraint::HP_Password::MIN_LENGTH characters and include
-			one upper and one lower case character. Must contain at least one number or a
-			special character - "$HTML::Widget::Constraint::ComplexPassword::SPECIAL_CHARACTERS"
+			Must contain at least one upper and one lower case character.
+			Must contain at least one number or a special character -
+			"$HTML::Widget::Constraint::ComplexPassword::SPECIAL_CHARACTERS"
 		)};
 	
 	#or this will be enought but then the error text is too long
 	$widget->constraint(ComplexPassword => @columns)
 		->message(qq{
-			Must contain at least one upper and one lower case character.
-			Must contain at least one number or a special character -
-			"$HTML::Widget::Constraint::ComplexPassword::SPECIAL_CHARACTERS"
+			Must contain at least $HTML::Widget::Constraint::ComplexPassword::MIN_LENGTH characters and include
+			one upper and one lower case character. Must contain at least one number or a
+			special character - "$HTML::Widget::Constraint::ComplexPassword::SPECIAL_CHARACTERS"
 		});
 
 =head1 DESCRIPTION
@@ -49,6 +49,12 @@ If you want to force different password lenght then do:
 
 	use HTML::Widget::Constraint::ComplexPassword;
 	$HTML::Widget::Constraint::ComplexPassword::MIN_LENGTH = 10;
+
+or
+
+	$widget->constraint(ComplexPassword => @columns)
+		->min_length(10)
+		->message("bla bla");
 
 If you want just numbers and no other special characters then remove characters from the
 SPECIAL_CHARACTERS list:

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Test::More;# 'no_plan';
-BEGIN { plan tests => 16 };
+BEGIN { plan tests => 18 };
 
 BEGIN {
 	use_ok ( 'HTML::Widget::Constraint::ComplexPassword', qw{
@@ -28,6 +28,8 @@ ok($constraint->validate('Ab@cDefG'), 'complex password2');
 ok($constraint->validate('!AbcDefG'), 'complex password3');
 ok($constraint->validate('AbcDefG?'), 'complex password4');
 ok(!$constraint->validate('AbcDefGh'), 'not complex password');
+ok(!$constraint->validate('1abcdefgh'), 'not complex password2');
+ok(!$constraint->validate('1ABCDEFGH'), 'not complex password3');
 ok(!$constraint->validate('AbcefG9'), 'short password');
 $HTML::Widget::Constraint::ComplexPassword::MIN_LENGTH = 7;
 ok($constraint->validate('AbcefG9'), 'short password but now ok after MIN_LENGTH change');
